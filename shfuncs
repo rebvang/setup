@@ -1,0 +1,113 @@
+set_standard_colours(){
+    echo -ne '\e]12;#00c368\e\\' # cursor colour
+    echo -ne '\e]10;#009500\e\\' # foreground colour
+    echo -ne '\e]13;#00e300\e\\' # mouse foreground colour
+    echo -ne '\e]14;#003e00\e\\' # mouse background colour
+    echo -ne '\e]19;#00a300\e\\' # highlight foreground colour
+    echo -ne '\e]17;#003500\e\\' # highlight background colour
+    echo -ne '\e]11;#1a1a1a\e\\' # Terminal background colour
+}
+
+set_CF_colours(){
+    echo -ne '\e]12;#c30000\e\\' # cursor colour
+    echo -ne '\e]10;#950000\e\\' # foreground colour
+    echo -ne '\e]13;#e30000\e\\' # mouse foreground colour
+    echo -ne '\e]14;#3e0000\e\\' # mouse background colour
+    echo -ne '\e]19;#a30000\e\\' # highlight foreground colour
+    echo -ne '\e]17;#350000\e\\' # highlight background colour
+    echo -ne '\e]11;#1a1a1a\e\\' # Terminal background colour
+}
+
+ns() {
+    local VAL=$(defaults read com.apple.mediaaccessibility "__Color__-MADisplayFilterCategoryEnabled")
+    if [[ $VAL == "1" ]]; then
+        # colour filter on
+        set_CF_colours
+    else
+        # colour filter off
+        set_standard_colours
+    fi
+}
+
+blinking_lights() {
+    while true; do
+        echo -ne '\e]11;#1a1a1a\e\\'
+        sleep 1
+        echo -ne '\e]11;#13f853912c50\e\\'
+        sleep 1
+    done
+}
+
+blinking_lights2() {
+    while true; do
+        echo -ne '\e]11;#ff0000\e\\'
+        echo -ne '\e]12;#ffff00\e\\'
+        sleep 1
+        echo -ne '\e]11;#ffff00\e\\'
+        echo -ne '\e]12;#ff0000\e\\'
+        sleep 1
+    done
+}
+
+copy() {
+    if [[ -z $1 ]]; then
+        pbcopy ""
+    else
+        pbcopy < "$1"
+    fi
+}
+
+paste() {
+    if [[ $1 == "over" ]]; then
+		pbpaste > "$2"
+	else
+		pbpaste >> "$1"
+	fi
+}
+
+empty() {
+    > $1
+}
+
+please() {
+    "$@"
+}
+
+be_polite() {
+	echo "Please be polite"
+}
+
+thank_you() {
+    # If you say "thank you", you can do 'clear'. If not, you can't
+	if [[ "$1" == "you" ]]; then
+	    command clear
+	else
+	    be_polite
+	fi
+}
+
+annoy() {
+    while true; do
+        printf "\a"
+        sleep $(( (RANDOM % 30) + 1 ))
+    done
+}
+
+clear_line() {
+    echo -ne '\e[A' # move cursor up one line
+    echo -ne '\e[2K' # clear entire line (to hide PID)
+    echo -ne '\r' # move cursor to column 1
+}
+
+background_and_clear_PID() {
+    "$@" & # background the function
+    clear_line
+}
+
+vim() {
+    open -n -a Terminal.app \
+        --env TMUX=1 \
+        --env LAUNCH_VIM=1 \
+        --env TARGET_PWD="$PWD" \
+        --env VIM_ARGS="$*"
+}
